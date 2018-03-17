@@ -86,7 +86,7 @@ public class RandomizedQueue<Item> implements Iterable<Item>{
         private int i = 0;
         private Item ar[] = (Item[]) new Object[n];
         
-        private arrayIterator(){
+        public arrayIterator(){
             
             for (int t = 0; t < n; t++){ar[t] = targetArray[t];}
         }        
