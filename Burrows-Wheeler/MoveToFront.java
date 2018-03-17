@@ -1,72 +1,86 @@
-import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
+import edu.princeton.cs.algs4.StdOut;
 
 
-public class BurrowsWheeler
+public class MoveToFront
 {    
     private static final int R = 256;
-    private static CircularSuffixArray csArray;
-    private static char[] transform;
-
 
     
-    // apply Burrow-Wheeler transform, reading from standard input and writing to standard output
-    public static void transform()
+    
+    public MoveToFront() {  }
+    
+    
+    
+    private static char[] alphabetArray()
     {
-        String sInput = BinaryStdIn.readString();
-        char[] string = sInput.toCharArray();
-        csArray = new CircularSuffixArray(sInput);
-        transform = new char[csArray.length()];
+        // Initialize the alphabet
+        char[] dict = new char[R];
+        for (char i = 0; i < R; i++) { dict[i] = i; }
         
-         // find out the row in the sorted array that matches the original string(sInput)
-        for (int i = 0; i < string.length; i++)   
-        { 
-            int firstletter = csArray.index(i);
-            if (firstletter == 0)  { BinaryStdOut.write(i);   transform[i] = string[string.length-1]; }
-            else { transform[i] = string[firstletter -1];   }
-        }
-        
-        String str = String.valueOf(transform);
-        BinaryStdOut.write(str);
-        
-        BinaryStdOut.close();
-         
+        return dict;
     }
     
     
     
-    // apply Burrow-Wheeler inverse transform, reading from standard input and writing to standard output
-    public static void inverseTransform()
+    // apply move-to-front encoding, reading from standard input and writing to standard output
+    public static void encode()
     {
-        int firstletter = BinaryStdIn.readInt();
-        String t = BinaryStdIn.readString();
-        int n = t.length(); 
+        char[] order = alphabetArray();
         
-        int[] count = new int[R+1];
-        int[] next = new int[n];
-        
-        // count the frequency of each char appearance in the input string
-        for (int i = 0; i < n; i++)
-        {   count[t.charAt(i)+1]++;  }
-        
-        // convert the frequency to index
-        for (int i = 1; i <= R; i++)
-        {   count[i] = count[i] + count[i-1]; }
-        
-        // put the index into the next[]
-        for (int i = 0; i < n; i++)
-        {   next[count[t.charAt(i)]++] = i; }
-        
-        // construct the original string with next[] and first and t[]
-        int index = next[firstletter];
-        
-        for (int i = 0; i < n; i++)
+        while (!BinaryStdIn.isEmpty())
         {
-            BinaryStdOut.write(t.charAt(index));
-            index = next[index];
-        }
+             // Read in 8-bits char from input one at a time
+            char c = BinaryStdIn.readChar(8);
+            int out = -1;
+            
+            // Locate the letter in the alphabet
+            for (int i = 0; i < R; i++)
+            {
+                char cInOrder = order[i];
+                if (c == cInOrder)  
+                {   
+                    BinaryStdOut.write(i, 8); 
+                    out = i;
+                    break; 
+                }
+            }
+                // Move the letter to the front in the dictionary
+                while ( out > 0)
+                {
+                    order[out] = order[out-1];
+                    out--;
+                }
+                order[0] = c;
+            }
         
+        BinaryStdOut.close();
+    }
+    
+    
+    
+    // apply move-to--front decoding, reading from standard input and witing to standard output
+    public static void decode()
+    {
+        char[] order = alphabetArray();
+        
+        while (!BinaryStdIn.isEmpty())
+        {
+            int i = BinaryStdIn.readInt(8);
+            char c = order[i];
+            
+            BinaryStdOut.write(c);
+            
+            // Move the letter to the front
+            while (i > 0)
+            {
+                order[i] = order[i-1];
+                i--;
+            }
+            order[0] = c;
+        }
+       
         BinaryStdOut.close();
     }
     
@@ -76,9 +90,8 @@ public class BurrowsWheeler
     // if args[0] is ' + ', apply move-to-front decoding
     public static void main(String[] args)
     {
-         if      (args[0].equals("-")) transform();
-        else if (args[0].equals("+")) inverseTransform();
-        else throw new IllegalArgumentException("Illegal command line argument");
-        
+        if      (args[0].equals("-")) { encode(); }
+        else if (args[0].equals("+")) { decode(); }
+        else { throw new IllegalArgumentException("Illegal command line argument"); }
     }
 }
